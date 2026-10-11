@@ -10,8 +10,7 @@ import { favoriteService } from "../../services/favoriteService";
 import { noteService } from "../../services/noteService";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
-
-const uploadsUrl = import.meta.env.VITE_UPLOADS_URL || "http://localhost:5000";
+import { getProductImage } from "../../utils/productImage";
 
 function ProductDetails() {
   const { id } = useParams();
@@ -108,7 +107,7 @@ function ProductDetails() {
   if (loading) return <LoadingSpinner />;
   if (!product) return <div className="container py-5"><AlertMessage type="danger" message={error} /></div>;
 
-  const imageUrl = product.image ? `${uploadsUrl}${product.image}` : "https://images.unsplash.com/photo-1560493676-04071c5f467b?auto=format&fit=crop&w=1200&q=80";
+  const imageUrl = getProductImage(product);
 
   return (
     <div className="container py-4">
