@@ -1,6 +1,6 @@
 # FarmConnect Frontend
 
-FarmConnect Frontend is the React and Vite web application for farmers, buyers, and admins using the FarmConnect backend API. It includes public product browsing, authentication, protected dashboards, role-based routes, Axios API services, Bootstrap styling, and JWT storage in `localStorage`.
+FarmConnect Frontend is the React and Vite web application for farmers, buyers, and admins using the FarmConnect backend API. It includes public product browsing, authentication, protected dashboards, role-based routes, Axios API services, Bootstrap styling, and JWT storage in `localStorage` for authenticated sessions.
 
 ## Tech Stack
 
@@ -26,7 +26,7 @@ FarmConnect Frontend is the React and Vite web application for farmers, buyers, 
 
 - Node.js 18 or newer
 - npm
-- A running FarmConnect backend API
+- A running FarmConnect backend API and configured MySQL/MariaDB database
 
 ## Setup
 
@@ -65,6 +65,30 @@ npm run dev
 
 Vite prints the local app URL, usually `http://localhost:5173`.
 
+### Windows PowerShell Setup
+
+Use two PowerShell terminals. In the first, set up and start the backend (follow the backend README for database configuration):
+
+```powershell
+Set-Location ..\farmconnect-backend
+npm install
+Copy-Item .env.example .env
+# Edit .env with your local DB password and a private JWT secret.
+Get-Content .\database\schema.sql | mysql -u root -p
+Get-Content .\database\seed.sql | mysql -u root -p
+npm run dev
+```
+
+In the second terminal, from this frontend folder:
+
+```powershell
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+The backend setup script creates all feature tables and the seed script loads demo records. Both scripts reset existing data; do not run them against a database containing records you need to keep. The backend's full setup guide is in [the backend README](../farmconnect-backend/README.md).
+
 ## Environment Variables
 
 - `VITE_API_URL`: Backend API base URL, usually `http://localhost:5000/api`.
@@ -96,6 +120,9 @@ npm run preview
 - If the product list does not load, check that the backend is running and `VITE_API_URL` ends with `/api`.
 - If image uploads do not display, check that `VITE_UPLOADS_URL` points to the backend root, not `/api`.
 - If login succeeds but dashboard requests fail, clear the browser's `farmconnect_token` and `farmconnect_user` values from `localStorage`, then log in again.
+- Buyer favorites are stored server-side for each account and remain available after logging in from another browser.
+- The Browse Produce page shows active categories with locally bundled item photos. Photo credits and licenses are listed in `CATEGORY_IMAGE_ATTRIBUTION.md`.
+- The seeded demo accounts all use `password123`; replace all local secrets in `.env` and never include that file in a submission.
 - If the backend reports a CORS error, add the frontend origin printed by Vite to the backend `.env` `CLIENT_URLS` value and restart the backend.
 
 ## Page and Route Guide
@@ -129,7 +156,8 @@ All buyer routes require login as a buyer.
 - `/buyer/profile`: Create or update buyer profile.
 - `/buyer/orders`: Track order status.
 - `/buyer/inquiries`: Track sent inquiries.
-- `/buyer/favorites`: View locally saved favorite product links.
+- `/buyer/notes`: Save private reminders for products.
+- `/buyer/favorites`: View saved favorite products synced to the buyer account in the database.
 
 ### Admin Routes
 
@@ -140,6 +168,7 @@ All admin routes require login as an admin.
 - `/admin/products`: Review and remove product listings.
 - `/admin/orders`: Review and update order status.
 - `/admin/categories`: Add or deactivate produce categories.
+- `/admin/audit-logs`: Review recorded user and marketplace actions.
 
 ## Authentication Flow
 

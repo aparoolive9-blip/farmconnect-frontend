@@ -5,6 +5,7 @@ export const adminService = {
   getUsers: () => api.get("/admin/users"),
   getProducts: () => api.get("/admin/products"),
   getOrders: () => api.get("/admin/orders"),
+  getAuditLogs: () => api.get("/admin/audit-logs"),
   updateUserStatus: (id, status) => api.put(`/admin/users/${id}/status`, { status }),
   getCategories: () => api.get("/categories"),
   createCategory: (data) => api.post("/categories", data),

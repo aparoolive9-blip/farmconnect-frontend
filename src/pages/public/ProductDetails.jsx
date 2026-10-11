@@ -6,6 +6,8 @@ import { useAuth } from "../../context/AuthContext";
 import { productService } from "../../services/productService";
 import { orderService } from "../../services/orderService";
 import { inquiryService } from "../../services/inquiryService";
+import { favoriteService } from "../../services/favoriteService";
+import { noteService } from "../../services/noteService";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDate } from "../../utils/formatDate";
 
@@ -17,9 +19,11 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [orderForm, setOrderForm] = useState({ quantity_requested: "", delivery_option: "pickup", buyer_message: "" });
   const [inquiryMessage, setInquiryMessage] = useState("");
+  const [noteText, setNoteText] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     productService.getProduct(id)
@@ -27,6 +31,17 @@ function ProductDetails() {
       .catch(() => setError("Product not found."))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!user || user.role !== "buyer" || !id) {
+      setIsFavorite(false);
+      return;
+    }
+
+    favoriteService.getFavoriteStatus(id)
+      .then((response) => setIsFavorite(Boolean(response.data.isFavorite)))
+      .catch(() => setIsFavorite(false));
+  }, [id, user]);
 
   async function handleOrderSubmit(event) {
     event.preventDefault();
@@ -56,14 +71,38 @@ function ProductDetails() {
     }
   }
 
-  function saveFavorite() {
-    const favorites = JSON.parse(localStorage.getItem("farmconnect_favorites") || "[]");
-
-    if (!favorites.includes(product.id)) {
-      localStorage.setItem("farmconnect_favorites", JSON.stringify([...favorites, product.id]));
+  async function saveFavorite() {
+    if (!user || user.role !== "buyer") {
+      setError("Please log in as a buyer to save favorites.");
+      return;
     }
 
-    setNotice("Product saved to favorites.");
+    try {
+      const response = await favoriteService.toggleFavorite(id);
+      setIsFavorite(Boolean(response.data.isFavorite));
+      setNotice(response.data.message);
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to update favorites.");
+    }
+  }
+
+  async function handleNoteSubmit(event) {
+    event.preventDefault();
+    setNotice("");
+    setError("");
+
+    if (!noteText.trim()) {
+      setError("Please enter a note before saving.");
+      return;
+    }
+
+    try {
+      await noteService.createNote({ product_id: Number(id), note_text: noteText });
+      setNotice("Note saved to your buyer notes.");
+      setNoteText("");
+    } catch (err) {
+      setError(err.response?.data?.message || "Unable to save note.");
+    }
   }
 
   if (loading) return <LoadingSpinner />;
@@ -90,7 +129,26 @@ function ProductDetails() {
             <dt className="col-5">Harvest date</dt><dd className="col-7">{formatDate(product.harvest_date)}</dd>
             <dt className="col-5">Farmer</dt><dd className="col-7">{product.farmer_name}</dd>
           </dl>
-          {user?.role === "buyer" && <button className="btn btn-outline-success" onClick={saveFavorite}>Save favorite</button>}
+          {user?.role === "buyer" && (
+            <div className="d-flex gap-2 flex-wrap">
+              <button className="btn btn-outline-success" onClick={saveFavorite}>
+                {isFavorite ? "Remove favorite" : "Save favorite"}
+              </button>
+            </div>
+          )}
+          {user?.role === "buyer" && (
+            <form className="mt-3" onSubmit={handleNoteSubmit}>
+              <label className="form-label">Buyer note</label>
+              <textarea
+                className="form-control mb-2"
+                rows="3"
+                placeholder="Add a quick reminder or inspection note for this product"
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+              />
+              <button className="btn btn-outline-secondary" type="submit">Save note</button>
+            </form>
+          )}
         </div>
       </div>
       {user?.role === "buyer" && (

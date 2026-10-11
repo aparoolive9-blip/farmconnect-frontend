@@ -17,6 +17,7 @@ const linksByRole = {
     ["Browse", "/products"],
     ["My Orders", "/buyer/orders"],
     ["My Inquiries", "/buyer/inquiries"],
+    ["My Notes", "/buyer/notes"],
     ["Favorites", "/buyer/favorites"]
   ],
   admin: [
@@ -24,7 +25,8 @@ const linksByRole = {
     ["Users", "/admin/users"],
     ["Products", "/admin/products"],
     ["Orders", "/admin/orders"],
-    ["Categories", "/admin/categories"]
+    ["Categories", "/admin/categories"],
+    ["Audit Logs", "/admin/audit-logs"]
   ]
 };
 

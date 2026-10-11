@@ -20,8 +20,10 @@ import BuyerDashboard from "./pages/buyer/BuyerDashboard";
 import BuyerProfile from "./pages/buyer/BuyerProfile";
 import MyOrders from "./pages/buyer/MyOrders";
 import MyInquiries from "./pages/buyer/MyInquiries";
+import MyNotes from "./pages/buyer/MyNotes";
 import Favorites from "./pages/buyer/Favorites";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminAuditLogs from "./pages/admin/AdminAuditLogs";
 import ManageUsers from "./pages/admin/ManageUsers";
 import ManageProducts from "./pages/admin/ManageProducts";
 import ManageOrders from "./pages/admin/ManageOrders";
@@ -60,6 +62,7 @@ function App() {
               <Route path="profile" element={<BuyerProfile />} />
               <Route path="orders" element={<MyOrders />} />
               <Route path="inquiries" element={<MyInquiries />} />
+              <Route path="notes" element={<MyNotes />} />
               <Route path="favorites" element={<Favorites />} />
             </Route>
           </Route>
@@ -71,6 +74,7 @@ function App() {
               <Route path="products" element={<ManageProducts />} />
               <Route path="orders" element={<ManageOrders />} />
               <Route path="categories" element={<ManageCategories />} />
+              <Route path="audit-logs" element={<AdminAuditLogs />} />
             </Route>
           </Route>
         </Route>
