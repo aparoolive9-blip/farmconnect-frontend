@@ -5,6 +5,17 @@ import AlertMessage from "../../components/AlertMessage";
 import { productService } from "../../services/productService";
 import { adminService } from "../../services/adminService";
 
+const categoryImages = {
+  maize: "/category-images/maize.jpg",
+  beans: "/category-images/beans.jpg",
+  matooke: "/category-images/plantain.jpg",
+  coffee: "/category-images/coffee.jpg",
+  milk: "/category-images/milk.jpg",
+  poultry: "/category-images/poultry.jpg",
+  vegetables: "/category-images/vegetables.jpg",
+  fruits: "/category-images/fruits.jpg"
+};
+
 function BrowseProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -48,6 +59,13 @@ function BrowseProducts() {
     loadProducts(filters);
   }
 
+  function selectCategory(category) {
+    const categoryId = String(category.id) === filters.category_id ? "" : String(category.id);
+    const nextFilters = { ...filters, category_id: categoryId };
+    setFilters(nextFilters);
+    loadProducts(nextFilters);
+  }
+
   function clearFilters() {
     const emptyFilters = { name: "", category_id: "", district: "", min_price: "", max_price: "", min_quantity: "" };
     setFilters(emptyFilters);
@@ -59,6 +77,28 @@ function BrowseProducts() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="section-title mb-0">Browse Produce</h1>
       </div>
+      <section className="mb-4" aria-labelledby="category-heading">
+        <h2 className="h5 mb-3" id="category-heading">Shop by category</h2>
+        <div className="category-tiles">
+          {categories.map((category) => {
+            const selected = filters.category_id === String(category.id);
+            const image = categoryImages[category.name.toLowerCase()] || "/category-images/fruits.jpg";
+
+            return (
+              <button
+                className={`category-tile${selected ? " is-selected" : ""}`}
+                type="button"
+                key={category.id}
+                aria-pressed={selected}
+                onClick={() => selectCategory(category)}
+              >
+                <img src={image} alt="" loading="lazy" />
+                <span>{category.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
       <form className="filter-bar row g-2 mb-4" onSubmit={handleSubmit}>
         <div className="col-md-3">
           <input className="form-control" name="name" placeholder="Search product" value={filters.name} onChange={handleChange} />
